@@ -3,8 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <title>Salary</title>
+
 </head>
 <body>
+<div id="root"></div>
+<script defer crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script defer crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+    const MainContent = () => {
+        const [state, setState] = React.useState({
+            salary: 0,
+            overtime: 0
+        });
 
+        const onChange = (e) => {
+            setState({...state, [e.target.name]: e.target.value});
+        }
+
+        return (
+            <div style={{display: "flex", flexDirection: "column", gap: 10}}>
+                <div style={{display: "flex", gap: 10}}>
+                    <label>
+                        <div>Цалин</div>
+                        <input value={state.salary} onChange={onChange} name={"salary"} type="number"/>
+                    </label>
+                    <label>
+                        <div>Илүү хоног</div>
+                        <input style={{width: "70px"}} value={state.overtime} onChange={onChange} name={"overtime"}
+                               type="number"/>
+                    </label>
+                </div>
+                <Salary salary={state.salary} overtime={state.overtime}/>
+            </div>
+        );
+    }
+
+    /**
+     * @param salary {number}
+     * @param overtime {number}
+     * @returns {JSX.Element}
+     */
+    const Salary = ({salary, overtime}) => {
+        const nd = salary * 0.115;
+        const hhoat = (salary - nd) * 0.1
+        const discount = {
+            1000000: 18000,
+            1200000: 16000,
+            1300000: 16000,
+            1500000: 16000,
+            1800000: 14000,
+            2000000: 14000,
+            2200000: 14000,
+            2500000: 12000,
+            2700000: 12000,
+            3000000: 10000,
+        }
+        const taxedSalary = salary - nd - hhoat;
+        const addedSalary = taxedSalary + discount[salary];
+        const formatter = Intl.NumberFormat("mn-MN", {
+            style: "currency",
+            currency: "MNT",
+            maximumFractionDigits: 1,
+        });
+
+        /**
+         * @param number {number}
+         */
+        const format = (number) => {
+            return formatter.format(number).replaceAll("MNT", "₮")
+        }
+
+        return <div>
+            <div>{format(salary)} - {format(nd)} (11.5%) = {format(salary - nd)}</div>
+            <div>{format(salary - nd)} - {format(hhoat)} (10%) = {format(taxedSalary)}</div>
+            <div style={{
+                display: "flex",
+                gap: 5
+            }}>{format(taxedSalary)} + {format(discount[salary])} (Хөнгөлөх) = <div
+                style={{color: "green", fontWeight: "bold"}}>{format(addedSalary)}</div>
+            </div>
+            <div style={{display: "flex", gap: 5}}>Сард 2 удаа цалих авах бол: {format(addedSalary)} / 2 = <div
+                style={{color: "green", fontWeight: "bold"}}>{format(addedSalary / 2)}</div></div>
+
+            {
+                overtime ? <div style={{marginTop: "10px"}}>
+                        <div>Илүү {overtime} хоног бодвол:</div>
+                        <div>{format(salary)} / 22 = {format(salary / 22 * overtime)} ({overtime} өдрийн цалин)</div>
+                        <div style={{
+                            display: "flex",
+                            gap: 5
+                        }}>{format(addedSalary / 2)} + {format(salary / 22 * overtime)} = <div style={{
+                            color: "green",
+                            fontWeight: "bold"
+                        }}>{format((addedSalary / 2) + (salary / 22 * overtime))}</div>
+                        </div>
+                    </div>
+                    : null
+            }
+        </div>
+    }
+
+
+    ReactDOM.render(<MainContent/>, document.getElementById('root'));
+</script>
 </body>
 </html>
